@@ -38,6 +38,8 @@
 
       R/r = Quick reset
 
+      I = Check the device ID
+
     - Finally, power off the arduino and remove the
       Attiny10/20/40
 
@@ -66,6 +68,9 @@
    this is based
  **************************************************
   Updates:
+
+   May 02, 2018: kimio.kosaka@gmail.com
+                 Added 'I' command 
 
    Apr 02, 2018: Ksdsksd@gmail.com
                   Added Lock bit setting to main menu
@@ -297,6 +302,8 @@ void loop() {
   //** 'S' = set fuse
   //** 'C' = clear fuse
   //** 'L' = Set Lock Bits
+  //** 'I' = Check the device ID
+
 
   char comnd = Sread();
 
