@@ -92,6 +92,11 @@ func main() {
 		}
 	}()
 
+	msg := "I"
+  if _, err = port.Write([]byte(msg)); err != nil {
+     log.Fatal(err)
+  }
+
 	oneByteBuffer := make([]byte, 1)
 	reciveCharBuffer := make([]byte, 255)
 	charCounter := 0
@@ -135,10 +140,10 @@ func main() {
 	if !deviceConnectedFlag {
 		log.Fatal("Error! Your setting " + deviceName + ", but " + reciveStringBuffer[attinyConnectedPosition])
 	}
-	fmt.Println(reciveStringBuffer[attinyConnectedPosition])
+	fmt.Printf(reciveStringBuffer[attinyConnectedPosition])
 
 	/*****  programming ATtiny  *****/
-	fmt.Println("Write " + hexFileName)
+	fmt.Println(" / Write " + hexFileName)
 	// set scanner for hex file
 	scanner := bufio.NewScanner(fd)
 
