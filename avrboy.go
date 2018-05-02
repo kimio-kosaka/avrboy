@@ -1,3 +1,9 @@
+/*
+     avrboy  by kimio kosaka (kimio.kosaka@gmail.com)
+
+2018.05.02 ver 1.0.0
+*/
+
 package main
 
 import (
@@ -93,9 +99,9 @@ func main() {
 	}()
 
 	msg := "I"
-  if _, err = port.Write([]byte(msg)); err != nil {
-     log.Fatal(err)
-  }
+	if _, err = port.Write([]byte(msg)); err != nil {
+		log.Fatal(err)
+	}
 
 	oneByteBuffer := make([]byte, 1)
 	reciveCharBuffer := make([]byte, 255)
@@ -159,6 +165,7 @@ func main() {
 		if _, err = port.Write([]byte(lineBuffer)); err != nil {
 			log.Fatal(err)
 		}
+		time.Sleep(50 * time.Millisecond)
 	}
 	if ferr = scanner.Err(); ferr != nil {
 		log.Fatal(ferr)
