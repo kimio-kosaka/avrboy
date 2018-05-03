@@ -1,7 +1,8 @@
 /*
      avrboy  by kimio kosaka (kimio.kosaka@gmail.com)
 
-2018.05.02 ver 1.0.0
+2018.05.02 ver. 1.0.1
+2018.05.02 ver. 1.0.0
 */
 
 package main
@@ -14,6 +15,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"strconv"
 	"time"
 
 	"github.com/goburrow/serial"
@@ -25,24 +27,28 @@ func getArgv() (port string, bps int, device string, file string, err error) {
 	flag.StringVar(&device, "p", "noDevice", "string flag")
 	flag.StringVar(&file, "U", "noFile", "string flag")
 	flag.Parse()
+
+	device = strings.ToLower(device)
+
 	switch device {
-	case "t4":
+	case "attiny4":
 		device = "ATtiny4"
-	case "t5":
+	case "attiny5":
 		device = "ATtiny5"
-	case "t9":
+	case "attiny9":
 		device = "ATtiny9"
-	case "t10":
+	case "attiny10":
 		device = "ATtiny10"
-	case "t20":
+	case "attiny20":
 		device = "ATtiny20"
-	case "t40":
+	case "attiny40":
 		device = "ATtiny40"
 	default:
+		fmt.Println("not support " + device)
 		device = "unKnown"
 	}
 	if port == "noPort" || file == "noFile" || device == "unKnown" {
-		err = errors.New("Error! -P or -U or -p")
+		err = errors.New("Error! -P "+port+" -b "+strconv.Itoa(bps)+" -U " + file + " -p " + device )
 	} else {
 		err = nil
 	}
@@ -74,6 +80,7 @@ func main() {
 	// Close hex file
 	defer fd.Close()
 
+  // serial port config
 	config := serial.Config{
 		Address:  address,
 		BaudRate: baudrate,
@@ -98,11 +105,13 @@ func main() {
 		}
 	}()
 
+  // send deviceID request to programmer
 	msg := "I"
 	if _, err = port.Write([]byte(msg)); err != nil {
 		log.Fatal(err)
 	}
 
+	// read programmer respons message
 	oneByteBuffer := make([]byte, 1)
 	reciveCharBuffer := make([]byte, 255)
 	charCounter := 0
@@ -114,6 +123,7 @@ func main() {
 		charCounter++
 	}
 
+  // programmers' message (byte slice) to string arry
 	var reciveStringBuffer [255]string
 	var lineCounter int = 0
 	for i := 0; i < charCounter; i++ {
@@ -142,9 +152,10 @@ func main() {
 			deviceConnectedFlag = reciveStringBuffer[i] == (deviceName + " connected")
 		}
 	}
+
 	// check connected Attiny device
 	if !deviceConnectedFlag {
-		log.Fatal("Error! Your setting " + deviceName + ", but " + reciveStringBuffer[attinyConnectedPosition])
+		log.Fatal("Error! Your request is " + deviceName + ", but " + reciveStringBuffer[attinyConnectedPosition])
 	}
 	fmt.Printf(reciveStringBuffer[attinyConnectedPosition])
 
@@ -152,7 +163,6 @@ func main() {
 	fmt.Println(" / Write " + hexFileName)
 	// set scanner for hex file
 	scanner := bufio.NewScanner(fd)
-
 	// send programming command to ATtiny programmer
 	cmd := "P "
 	if _, err = port.Write([]byte(cmd)); err != nil {
