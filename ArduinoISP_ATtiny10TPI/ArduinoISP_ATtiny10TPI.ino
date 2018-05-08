@@ -7,14 +7,23 @@ TPI mode == ATTiny_4_5_9_10_20_40Programmer
 Set the D7 HIGH or LOW, when you run this sketch.  
 You can select and run "ISP mode" or "TPI mode" by D7 status.
 
-if (D7 == HIGH (open) ){
-  D5 will be  HIGH
-  run "ISP mode"
-}
+See function setup()
 
-if (D7 == LOW (or connect D6)){
- D4 will be HIGH
- run "TPI mode"
+void setup(){
+  pinMode(4,OUTPUT);  //TPI mode indicator
+  pinMode(5,OUTPUT);  //ISP mode indicator
+  pinMode(6,OUTPUT);  //LOW output
+  digitalWrite(4,LOW);
+  digitalWrite(5,LOW);
+  digitalWrite(6,LOW);  
+  pinMode(7,INPUT_PULLUP);
+  if (digitalRead(7) == LOW ) {
+    digitalWrite(4,HIGH);  // indicato TPI
+    tpi_setup();  // run TPI
+  } else {
+    digitalWrite(5,HIGH);  // indcate ISP
+    isp_setup();  // run ISP
+  }
 }
 
 D4 and D5 are indicate TPI  or ISP mode.
