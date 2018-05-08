@@ -1,11 +1,28 @@
 /***************************************************
-This file is marged arduinoISP  and
-ATTiny_4_5_9_10_20_40Programmer 
-by Kimio Kosaka.
+This sketch include  ArduinoISP and ATTiny_4_5_9_10_20_40Programmer.
 
-Open D7 ArduinoISP
-connect D7-D6 ATTiny_4_5_9_10_20_40Programmer
+ISP mode == ArduinoISP
+TPI mode == ATTiny_4_5_9_10_20_40Programmer
 
+Set the D7 HIGH or LOW, when you run this sketch.  
+You can select and run "ISP mode" or "TPI mode" by D7 status.
+
+if (D7 == HIGH (open) ){
+  D5 will be  HIGH
+  run "ISP mode"
+}
+
+if (D7 == LOW (or connect D6)){
+ D4 will be HIGH
+ run "TPI mode"
+}
+
+D4 and D5 are indicate TPI  or ISP mode.
+I recommend connect LED to D4 and D5.
+
+mode change: Set the D7 H or L, push Reset button
+
+Kimio Kosaka. (May.07.2018)
 */
 
 
@@ -1669,11 +1686,20 @@ void avrisp() {
 
 // gorobal SETUP
 void setup(){
+  pinMode(4,OUTPUT);
+  pinMode(5,OUTPUT);
   pinMode(6,OUTPUT);
-  digitalWrite(6,LOW);
+  digitalWrite(4,LOW);
+  digitalWrite(5,LOW);
+  digitalWrite(6,LOW);  
   pinMode(7,INPUT_PULLUP);
-  if (digitalRead(7) == LOW ) tpi_setup();
-  else isp_setup();  
+  if (digitalRead(7) == LOW ) {
+    digitalWrite(4,HIGH);
+    tpi_setup();
+  } else {
+    digitalWrite(5,HIGH);
+    isp_setup();  
+  }
 }
 // Dummy LOOP
 void loop(){ 
