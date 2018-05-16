@@ -1,86 +1,71 @@
 /***************************************************
 This sketch include  ArduinoISP and ATTiny_4_5_9_10_20_40Programmer.
-
-ISP mode == ArduinoISP
+SPI mode == ArduinoISP
 TPI mode == ATTiny_4_5_9_10_20_40Programmer
-
-Set the D7 HIGH or LOW, when you run this sketch.  
-You can select and run "ISP mode" or "TPI mode" by D7 status.
-
+Set the  SELECT_BIT(default D3) HIGH or LOW, when you run this sketch.  
+You can select and run "SPI mode" or "TPI mode" by SELECT_BIT status.
 See function setup()
 
+#define OUTPUT_LOW 2
+#define SELECT_BIT 3
+#define TPI_LED 4
+#define SPI_LED 5
+
+// gorobal SETUP
 void setup(){
-  pinMode(4,OUTPUT);  //TPI mode indicator
-  pinMode(5,OUTPUT);  //ISP mode indicator
-  pinMode(6,OUTPUT);  //LOW output
-  digitalWrite(4,LOW);
-  digitalWrite(5,LOW);
-  digitalWrite(6,LOW);  
-  pinMode(7,INPUT_PULLUP);
-  if (digitalRead(7) == LOW ) {
-    digitalWrite(4,HIGH);  // indicato TPI
-    tpi_setup();  // run TPI
+  pinMode(TPI_LED,OUTPUT);
+  pinMode(SPI_LED,OUTPUT);
+  pinMode(OUTPUT_LOW,OUTPUT);
+  digitalWrite(TPI_LED,LOW);
+  digitalWrite(SPI_LED,LOW);
+  digitalWrite(OUTPUT_LOW,LOW);  
+  pinMode(SELECT_BIT,INPUT_PULLUP);
+  if (digitalRead(SELECT_BIT) == LOW ) {
+    digitalWrite(TPI_LED,HIGH);
+    tpi_setup();
   } else {
-    digitalWrite(5,HIGH);  // indcate ISP
-    isp_setup();  // run ISP
+    digitalWrite(SPI_LED,HIGH);
+    isp_setup();  
   }
 }
 
-D4 and D5 are indicate TPI  or ISP mode.
-I recommend connect LED to D4 and D5.
-
-mode change: Set the D7 H or L, push Reset button
-
-Kimio Kosaka. (May.07.2018)
+TPI_LED and SPI_LED are indicate TPI  or SPI mode.
+I recommend connect LED to TPI_LED and SPI_LED port
+mode change: Set the SELECT_BIT H or L, push Reset button
+Kimio Kosaka. (May.16.2018)
 */
 
 
 /**************************************************
    TPI programmer for ATtiny4/5/9/10/20/40
-
    Make the connections as shown below.
-
    To use:
  ***** Buad rate must be set to 9600 ****
-
     - Upload to arduino and power off
     - Connect ATtiny10 as shown
     - Power on and open the serial monitor
     - If things are working so far you should
       see "NVM enabled" and "ATtiny10/20/40 connected".
     - Input one-letter commands via serial monitor:
-
       D = dump memory. Displays all current memory
           on the chip
-
       E = erase chip. Erases all program memory
           automatically done at time of programming
-
       P = write program. After sending this, paste
           the program from the hex file into the
           serial monitor.
-
       S = set fuse. follow the instructions to set
           one of the three fuses.
-
       C = clear fuse. follow the instructions to clear
           one of the three fuses.
-
       L = Set Lock Bits No further programming & verification
           possible
-
       H = Toggle High Voltage Programming
-
       T = Toggle +12v enabled by High, or Low
-
       R/r = Quick reset
-
       I = Check the device ID
-
     - Finally, power off the arduino and remove the
       Attiny10/20/40
-
-
    Arduino                 ATtiny10
    ----------+          +----------------
    (SS#)  10 |--[R]-----| 6 (RESET#/PB3)
@@ -105,45 +90,33 @@ Kimio Kosaka. (May.07.2018)
    this is based
  **************************************************
   Updates:
-
    May 02, 2018: kimio.kosaka@gmail.com
                  Added 'I' command
-
    Apr 02, 2018: Ksdsksd@gmail.com
                   Added Lock bit setting to main menu
-
    Jan 23, 2017: Ksdsksd@gmail.com
                   Thanks to InoueTaichi Fixed incorrect #define Tiny40
-
    Mar 05, 2015: Ksdsksd@gamil.com
                   Added notifications to setting and clearing the system flags.
-
    Feb 23, 2015: Ksdsksd@gamil.com
                   Changed the programmer Diagram, This is the config I use, and get a sucessful programming of a tiny10 at 9600 baud.
-
    Mar 22, 2014: Ksdsksd@gmail.com
                   Added the quick reset to high before resetting the device.
                   Added code to stop the SPI and float the pins for testing the device while connected.
-
    Mar 20, 2014: Ksdsksd@gmail.com
                   Added a quick reset by sending 'r' or 'R' via the serial monitor.
                   Added a High voltage programming option from pin 9, toggled by 'H'
                   Added a High/low option for providing 12v to the reset pin, toggled by 'T'
-
    Mar 17, 2014: Ksdsksd@gmail.com
                   Had some trouble with the nibbles being swapped when programming on the 10 & 20,
                   added b1,b2 to hold the serial data before calling byteval()
                   Added Nat Blundell's patch to the code
-
    Apr 10, 2013: Ksdsksd@gmail.com
                   Applied Fix for setting and clearing flags
-
    Feb 7,  2013: Ksdsksd@gmail.com
                   Fixed programming timer, had intitial start at zero instead of current time.
-
    Dec 11, 2012: Ksdsksd@gmail.com
                   Added detect and programming for 4/5/9
-
    Dec 5-6, 2012: Ksdsksd@gmail.com
                   Incorperated read, and verify into program. Now have no program size limitation by using 328p.
                   Changed the outHex routines consolidated them into 1, number to be printed, and number of nibbles
@@ -151,12 +124,10 @@ Kimio Kosaka. (May.07.2018)
                   Added an auto word size check to ensure that there is the proper amount of words written for a 10/20/40
                   Removed Read program, Verify, and Finish from options
                   Changed baud rate to 19200 for delay from data written to the chip, to prevent serial buffer overrun.
-
    Oct 5, 2012: Ksdsksd@gmail.com
                 *** Noticed that when programming, the verification fails
                     at times by last 1-2 bytes programmed, and the Tiny would act erratic.
                     Quick fix was adding 3 NOP's to the end the Tiny's code, and ignoring the errors, the Tiny then performed as expected.
-
    Oct 4, 2012: Ksdsksd@gmail.com
                   Moved all Serial printed strings to program space
                   Added code to detect Tiny20
@@ -231,7 +202,6 @@ void tpi_setup() {
     SPI.setBitOrder(LSBFIRST);
     SPI.setDataMode(SPI_MODE0);
     SPI.setClockDivider(SPI_CLOCK_DIV32);
-
   */  start_tpi();
   
   pinMode(HVReset, OUTPUT);
@@ -1693,20 +1663,28 @@ void avrisp() {
 }
 
 
+
+
+
+#define OUTPUT_LOW 2
+#define SELECT_BIT 3
+#define TPI_LED 4
+#define SPI_LED 5
+
 // gorobal SETUP
 void setup(){
-  pinMode(4,OUTPUT);
-  pinMode(5,OUTPUT);
-  pinMode(6,OUTPUT);
-  digitalWrite(4,LOW);
-  digitalWrite(5,LOW);
-  digitalWrite(6,LOW);  
-  pinMode(7,INPUT_PULLUP);
-  if (digitalRead(7) == LOW ) {
-    digitalWrite(4,HIGH);
+  pinMode(TPI_LED,OUTPUT);
+  pinMode(SPI_LED,OUTPUT);
+  pinMode(OUTPUT_LOW,OUTPUT);
+  digitalWrite(TPI_LED,LOW);
+  digitalWrite(SPI_LED,LOW);
+  digitalWrite(OUTPUT_LOW,LOW);  
+  pinMode(SELECT_BIT,INPUT_PULLUP);
+  if (digitalRead(SELECT_BIT) == LOW ) {
+    digitalWrite(TPI_LED,HIGH);
     tpi_setup();
   } else {
-    digitalWrite(5,HIGH);
+    digitalWrite(SPI_LED,HIGH);
     isp_setup();  
   }
 }
