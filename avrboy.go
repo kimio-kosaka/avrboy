@@ -1,6 +1,7 @@
 /*
      avrboy  by kimio kosaka (kimio.kosaka@gmail.com)
 
+2018.05.02 ver. 1.0.2
 2018.05.02 ver. 1.0.1
 2018.05.02 ver. 1.0.0
 */
@@ -21,9 +22,9 @@ import (
 	"github.com/goburrow/serial"
 )
 
-func getArgv() (port string, bps int, device string, file string, err error) {
+func getArgv() (port string, bps int, device string, file string,  err error) {
 	flag.StringVar(&port, "P", "noPort", "string flag")
-	flag.IntVar(&bps, "b", 9600, "int flag")
+	flag.IntVar(&bps, "b", 19200, "int flag")
 	flag.StringVar(&device, "p", "noDevice", "string flag")
 	flag.StringVar(&file, "U", "noFile", "string flag")
 	flag.Parse()
@@ -87,7 +88,7 @@ func main() {
 		DataBits: databits,
 		StopBits: stopbits,
 		Parity:   parity,
-		Timeout:  30 * time.Second,
+		Timeout:  10 * time.Second,
 	}
 
 	// open sereialPort
@@ -106,7 +107,12 @@ func main() {
 	}()
 
   // send deviceID request to programmer
+	time.Sleep(800 * time.Millisecond)
 	msg := "I"
+	if _, err = port.Write([]byte(msg)); err != nil {
+		log.Fatal(err)
+	}
+  time.Sleep(200 * time.Millisecond)
 	if _, err = port.Write([]byte(msg)); err != nil {
 		log.Fatal(err)
 	}
