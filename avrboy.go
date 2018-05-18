@@ -112,9 +112,12 @@ func main() {
 	if _, err = port.Write([]byte(msg)); err != nil {
 		log.Fatal(err)
 	}
-  time.Sleep(200 * time.Millisecond)
-	if _, err = port.Write([]byte(msg)); err != nil {
-		log.Fatal(err)
+
+	if baudrate > 9600 {
+  	time.Sleep(200 * time.Millisecond)
+		if _, err = port.Write([]byte(msg)); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// read programmer respons message

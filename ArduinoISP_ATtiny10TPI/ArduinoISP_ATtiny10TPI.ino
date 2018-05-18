@@ -192,11 +192,12 @@ char type; // type of chip connected 1 = Tiny10, 2 = Tiny20
 char HVP = 0;
 char HVON = 0;
 
+#define BAUDRATE  19200
 
 // ATTiny_4_5_9_10_20_40Programmer SETUP
 void tpi_setup() {
   // set up serial
-  Serial.begin(9600); // you cant increase this, it'll overrun the buffer
+//  Serial.begin(BAUDRATE); // you cant increase this, it'll overrun the buffer
   // set up SPI
   /*  SPI.begin();
     SPI.setBitOrder(LSBFIRST);
@@ -1157,7 +1158,7 @@ static BitBangedSPI SPI;
 
 // ArduinoISP setup()
 void isp_setup() {
-  SERIAL.begin(BAUDRATE);
+//  SERIAL.begin(BAUDRATE);
 
   pinMode(LED_PMODE, OUTPUT);
   pulse(LED_PMODE, 2);
@@ -1666,20 +1667,35 @@ void avrisp() {
 
 
 
-#define OUTPUT_LOW 2
-#define SELECT_BIT 3
-#define TPI_LED 4
-#define SPI_LED 5
+//#define OUTPUT_LOW 2
+//#define SELECT_BIT 3
+#define TPI_LED 2
+#define SPI_LED 3
 
 // gorobal SETUP
 void setup(){
+  char swd;
+  Serial.begin(BAUDRATE);
   pinMode(TPI_LED,OUTPUT);
   pinMode(SPI_LED,OUTPUT);
-  pinMode(OUTPUT_LOW,OUTPUT);
+ // pinMode(OUTPUT_LOW,OUTPUT);
   digitalWrite(TPI_LED,LOW);
   digitalWrite(SPI_LED,LOW);
-  digitalWrite(OUTPUT_LOW,LOW);  
-  pinMode(SELECT_BIT,INPUT_PULLUP);
+ // digitalWrite(OUTPUT_LOW,LOW);  
+ // pinMode(SELECT_BIT,INPUT_PULLUP);
+  
+  while (Serial.available() <= 0);
+  swd = Serial.read();
+  if (swd == 'I') {
+    digitalWrite(TPI_LED,HIGH);
+    tpi_setup();
+  } else {
+    digitalWrite(SPI_LED,HIGH);
+    isp_setup();  
+  }
+ 
+ /* 
+  
   if (digitalRead(SELECT_BIT) == LOW ) {
     digitalWrite(TPI_LED,HIGH);
     tpi_setup();
@@ -1687,6 +1703,7 @@ void setup(){
     digitalWrite(SPI_LED,HIGH);
     isp_setup();  
   }
+  */
 }
 // Dummy LOOP
 void loop(){ 
