@@ -2,36 +2,9 @@
 This sketch include  ArduinoISP and ATTiny_4_5_9_10_20_40Programmer.
 SPI mode == ArduinoISP
 TPI mode == ATTiny_4_5_9_10_20_40Programmer
-Set the  SELECT_BIT(default D3) HIGH or LOW, when you run this sketch.  
-You can select and run "SPI mode" or "TPI mode" by SELECT_BIT status.
-See function setup()
 
-#define OUTPUT_LOW 2
-#define SELECT_BIT 3
-#define TPI_LED 4
-#define SPI_LED 5
+Auto change SPI or TPI by first control command from serialport 
 
-// gorobal SETUP
-void setup(){
-  pinMode(TPI_LED,OUTPUT);
-  pinMode(SPI_LED,OUTPUT);
-  pinMode(OUTPUT_LOW,OUTPUT);
-  digitalWrite(TPI_LED,LOW);
-  digitalWrite(SPI_LED,LOW);
-  digitalWrite(OUTPUT_LOW,LOW);  
-  pinMode(SELECT_BIT,INPUT_PULLUP);
-  if (digitalRead(SELECT_BIT) == LOW ) {
-    digitalWrite(TPI_LED,HIGH);
-    tpi_setup();
-  } else {
-    digitalWrite(SPI_LED,HIGH);
-    isp_setup();  
-  }
-}
-
-TPI_LED and SPI_LED are indicate TPI  or SPI mode.
-I recommend connect LED to TPI_LED and SPI_LED port
-mode change: Set the SELECT_BIT H or L, push Reset button
 Kimio Kosaka. (May.16.2018)
 */
 
@@ -204,7 +177,7 @@ void tpi_setup() {
     SPI.setDataMode(SPI_MODE0);
     SPI.setClockDivider(SPI_CLOCK_DIV32);
   */  start_tpi();
-  
+
   pinMode(HVReset, OUTPUT);
   // initialize memory pointer register
   setPointer(0x0000);
@@ -1681,9 +1654,9 @@ void setup(){
  // pinMode(OUTPUT_LOW,OUTPUT);
   digitalWrite(TPI_LED,LOW);
   digitalWrite(SPI_LED,LOW);
- // digitalWrite(OUTPUT_LOW,LOW);  
+ // digitalWrite(OUTPUT_LOW,LOW);
  // pinMode(SELECT_BIT,INPUT_PULLUP);
-  
+
   while (Serial.available() <= 0);
   swd = Serial.read();
   if (swd == 'I') {
@@ -1691,22 +1664,21 @@ void setup(){
     tpi_setup();
   } else {
     digitalWrite(SPI_LED,HIGH);
-    isp_setup();  
+    isp_setup();
   }
- 
- /* 
-  
+
+ /*
+
   if (digitalRead(SELECT_BIT) == LOW ) {
     digitalWrite(TPI_LED,HIGH);
     tpi_setup();
   } else {
     digitalWrite(SPI_LED,HIGH);
-    isp_setup();  
+    isp_setup();
   }
   */
 }
 // Dummy LOOP
-void loop(){ 
-  
-}
+void loop(){
 
+}
