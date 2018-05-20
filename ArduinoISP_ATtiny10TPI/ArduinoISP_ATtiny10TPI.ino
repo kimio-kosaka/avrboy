@@ -3,7 +3,18 @@ This sketch include  ArduinoISP and ATTiny_4_5_9_10_20_40Programmer.
 SPI mode == ArduinoISP
 TPI mode == ATTiny_4_5_9_10_20_40Programmer
 
-Auto change SPI or TPI by first control command from serialport 
+Set the  SELECT_BIT(default D3) HIGH or LOW, when you run this sketch.  
+You can select and run "SPI mode" or "TPI mode" by SELECT_BIT status.
+
+#define OUTPUT_LOW 2
+#define SELECT_BIT 3
+#define TPI_LED 4
+#define SPI_LED 5
+
+TPI_LED and SPI_LED are indicate TPI  or SPI mode.
+I recommend connect LED to TPI_LED and SPI_LED port
+mode change: Set the SELECT_BIT H or L, push Reset button
+See function setup()
 
 Kimio Kosaka. (May.16.2018)
 */
@@ -148,6 +159,9 @@ Kimio Kosaka. (May.16.2018)
 #define TimeOut 1
 #define HexError 2
 #define TooLarge 3
+
+#define BAUDRATE_TPI 9600
+
 // represents the current pointer register value
 unsigned short adrs = 0x0000;
 
@@ -165,12 +179,12 @@ char type; // type of chip connected 1 = Tiny10, 2 = Tiny20
 char HVP = 0;
 char HVON = 0;
 
-#define BAUDRATE  19200
+
 
 // ATTiny_4_5_9_10_20_40Programmer SETUP
 void tpi_setup() {
   // set up serial
-//  Serial.begin(BAUDRATE); // you cant increase this, it'll overrun the buffer
+//  Serial.begin(BAUDRATE_TPI); // you cant increase this, it'll overrun the buffer
   // set up SPI
   /*  SPI.begin();
     SPI.setBitOrder(LSBFIRST);
@@ -1052,7 +1066,7 @@ void outHex(unsigned int n, char l) { // call with the number to be printed, and
 
 // Configure the baud rate:
 
-#define BAUDRATE  19200
+#define BAUDRATE_SPI 19200
 // #define BAUDRATE 115200
 // #define BAUDRATE 1000000
 
@@ -1640,23 +1654,24 @@ void avrisp() {
 
 
 
-//#define OUTPUT_LOW 2
-//#define SELECT_BIT 3
-#define TPI_LED 2
-#define SPI_LED 3
+#define OUTPUT_LOW 2
+#define SELECT_BIT 3
+#define TPI_LED 4
+#define SPI_LED 5
 
 // gorobal SETUP
 void setup(){
   char swd;
-  Serial.begin(BAUDRATE);
+
   pinMode(TPI_LED,OUTPUT);
   pinMode(SPI_LED,OUTPUT);
- // pinMode(OUTPUT_LOW,OUTPUT);
+  pinMode(OUTPUT_LOW,OUTPUT);
   digitalWrite(TPI_LED,LOW);
   digitalWrite(SPI_LED,LOW);
- // digitalWrite(OUTPUT_LOW,LOW);
- // pinMode(SELECT_BIT,INPUT_PULLUP);
+  digitalWrite(OUTPUT_LOW,LOW);
+  pinMode(SELECT_BIT,INPUT_PULLUP);
 
+/*
   while (Serial.available() <= 0);
   swd = Serial.read();
   if (swd == 'I') {
@@ -1667,16 +1682,18 @@ void setup(){
     isp_setup();
   }
 
- /*
+ */
 
   if (digitalRead(SELECT_BIT) == LOW ) {
     digitalWrite(TPI_LED,HIGH);
+      Serial.begin(BAUDRATE_TPI);
     tpi_setup();
   } else {
     digitalWrite(SPI_LED,HIGH);
+    Serial.begin(BAUDRATE_SPI);
     isp_setup();
   }
-  */
+  
 }
 // Dummy LOOP
 void loop(){
